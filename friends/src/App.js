@@ -26,38 +26,49 @@ class App extends Component {
         })
   }
 
-  handleSubmit = (e, name, age, email) => {
+  addFriend = (e, friend) => {
     e.preventDefault();
     
     let newId = this.state.friends.length+1;
     
     const newFriend = {
-      name,
-      age,
-      email,
+      ...friend,
       id: newId
     }
 
     axios
       .post('http://localhost:5000/friends', newFriend)
-        .then(response => {
-          console.log("Added new friend.")
+      .then(response => {
+        this.setState({
+          ...this.state,
+          friends: response.data
         })
-        .catch(error => {
-          console.log("Could not add new friend.")
-        })
-        
-    this.setState({
-      ...this.state,
-      friends: [...this.state.friends, newFriend]
-    });
+      })
+      .catch(error => {
+        console.log("Could not add new friend.")
+      })
+  }
+
+  deleteFriend = (e, id) => {
+    e.preventDefault();
+
+    axios
+      .delete(`http://localhost:5000/friends/${id}`)
+      .then(response => {
+        this.setState({
+          friends: response.data
+        });
+      })
+      .catch(error => {
+        console.log("Could not delete friend.")
+      })
   }
 
   render() {
     return (
       <div className="App">
-        <Route path="/" render={ props => <FriendsList {...props} friends={this.state.friends} />} />
-        <Route path="/" render={ props => <AddFriend {...props} handleSubmit={this.handleSubmit} />} />
+        <Route exact path="/" render={ props => <FriendsList {...props} friends={this.state.friends} deleteFriend={this.deleteFriend} />} />
+        <Route path="/friend-form" render={ props => <AddFriend {...props} addFriend={this.addFriend} /> } />
       </div>
     );
   }
