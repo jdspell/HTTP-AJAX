@@ -9,7 +9,9 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      friends: []
+      friends: [],
+      selectedFriend: null,
+      update: false,
     };
   }
 
@@ -64,12 +66,80 @@ class App extends Component {
       })
   }
 
+  // setUpdateForm = (e, friend) => {
+  //   e.preventDefault();
+  //   this.setState({
+  //     ...this.state,
+  //     selectedFriend: friend
+  //   });
+  // }
+
+  updateFriend = (e, friendId) => {
+    e.preventDefault();
+    axios
+      .put(`http://localhost:5000/friends/${friendId}`, {name: '', age: '', email: '', id: friendId})
+      .then(response => {
+        this.setState({
+          selectedFriend: null,
+          friends: response.data
+        });
+      })
+      .catch(error => {
+        console.log("Could not update item.");
+      })
+  }
+
+  findFriend = (e, id) => {
+    this.setState({
+      ...this.state,
+      selectedFriend: this.state.friends.find(friend => friend.id === id),
+      update: true
+    });
+  }
+
   render() {
+    // console.log(this.state.update);
     return (
       <div className="App">
-        <Route exact path="/" render={ props => <FriendsList {...props} friends={this.state.friends} deleteFriend={this.deleteFriend} />} />
-        <Route path="/friend-form" render={ props => <AddFriend {...props} addFriend={this.addFriend} /> } />
+
+        <Route 
+          exact path="/" 
+          render={ props => (
+            <FriendsList 
+              {...props} 
+              friends={this.state.friends} 
+              deleteFriend={this.deleteFriend}
+              updateFriend={this.updateFriend}
+              findFriend={this.findFriend}
+            />
+          )} 
+        />
+
+        <Route 
+          path="/friend-form" 
+          render={ props => (
+            <AddFriend 
+              {...props} 
+              addFriend={this.addFriend}
+              setUpdateForm={this.setUpdateForm}
+              selectedFriend={this.state.selectedFriend}
+            /> 
+          )} 
+        />
+
+        <Route
+          path="/friends/:id"
+          render={props => (
+            <AddFriend
+              
+              selectedFriend={{one: this.state.selectedFriend, two: this.state.update}}
+              // updateFriend={{this.state.update}
+            />
+          )}
+        />
       </div>
+
+      
     );
   }
 }

@@ -4,12 +4,29 @@ import { Link } from 'react-router-dom';
 export default class AddFriend extends React.Component {
     constructor(props) {
         super(props);
+        // console.log(this.props.match);
         this.state = {
-            friend: {
+            friend: (this.props.updateFriend ? {...this.props.selectedFriend} : {
                 name: '',
                 age: '',
                 email: ''
-            },
+            }),
+        }
+    }
+
+    componentDidMount(){
+        console.log(this.props.selectedFriend);
+        if(this.props.update) {
+            this.setState({friend: this.props.selectedFriend})
+        }
+    }
+
+
+    componentDidUpdate(prevProps){
+        if(this.props.selectedFriend && prevProps.selectedFriend !== this.props.selectedFriend){
+            this.setState({
+                friend: this.props.selectedFriend
+            });
         }
     }
 
@@ -22,10 +39,25 @@ export default class AddFriend extends React.Component {
         }));
     }
 
+    handleSubmit = e => {
+        if(this.props.selectedFriend) {
+            this.props.update(e, this.state.friend);
+        } else {
+            this.props.addFriend(e, this.state.friend);
+        }
+        this.setState({
+            friend: {
+                name: '',
+                age: '',
+                email: ''
+            }
+        });
+    }
+
     render() {
         return(
             <div className="add-friend-form">
-                <form onSubmit={e => this.props.addFriend(e, this.state.friend)}>
+                <form onSubmit={this.handleSubmit}>
                     <input 
                         type="text"
                         name="name"
